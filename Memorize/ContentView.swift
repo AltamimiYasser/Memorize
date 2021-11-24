@@ -8,55 +8,101 @@
 import SwiftUI
 
 struct ContentView: View {
-    var emojis = [
+    var vehiclesTheme = [
         "🚗", "🚕", "🚙", "🚌", "🚎", "🏎", "🚓", "🚑", "🚒", "🚐", "🛻", "🚚",
         "🚛", "🚜", "🚍", "🚘", "🚖", "🚇", "🚊", "🛵", "🏍", "🛺", "🚨", "🚔"
     ]
-    @State var emojiCount = 15
+    
+    var facesTheme = [
+        "😀", "😃", "😄", "😁", "😆", "😅", "😂", "🤣", "🥲", "☺️", "😊", "😇",
+        "🙂", "🙃", "😉", "😌", "😍", "🥰", "😘", "😗", "😙", "😚", "😋", "😛"
+    ]
+    
+    var flagsTheme = [
+        "🏳️", "🏴", "🏁", "🚩", "🏳️‍⚧️", "🏴‍☠️", "🇦🇫", "🇦🇽", "🇦🇱", "🇩🇿", "🇦🇸", "🇦🇩",
+        "🇦🇴", "🇦🇮", "🇦🇶", "🇦🇬", "🇦🇷", "🇦🇲", "🇦🇼", "🇦🇺", "🇦🇹", "🇦🇿", "🇧🇸", "🇧🇭"
+    ]
+
+    @State var emojiCount = 0
+    @State var chosenTheme: [String] = []
+    
+    var minCardSize: CGFloat {
+        emojiCount >= 14 ? 65 : 75
+    }
+
+    init() {
+        _chosenTheme = State(wrappedValue: vehiclesTheme)
+        _emojiCount = State(wrappedValue: chosenTheme.count)
+    }
 
     var body: some View {
         VStack {
+            Text("Memorize!").font(.largeTitle)
+
             ScrollView {
-                LazyVGrid(columns: [GridItem(.adaptive(minimum: 65))]) {
-                    ForEach(emojis[0..<emojiCount], id: \.self) { emoji in
+                LazyVGrid(columns: [GridItem(.adaptive(minimum: minCardSize))]) {
+                    ForEach(chosenTheme[0..<emojiCount], id: \.self) { emoji in
                         CardView(content: emoji)
-                            .aspectRatio(2/3, contentMode: .fit)
+                            .aspectRatio(2 / 3, contentMode: .fit)
                     }
                 }
             }
                 .foregroundColor(.red)
             Spacer()
             HStack {
-                removeButton
+                vehiclesButton
                 Spacer()
-                addButton
+                FacesButton
+                Spacer()
+                FlagsButton
             }
-                .font(.largeTitle)
-                .padding(.horizontal)
+            .padding(.horizontal)
         }
             .padding(.horizontal)
     }
 
-    var removeButton: some View {
+    var vehiclesButton: some View {
         Button {
-            if emojiCount > 4 {
-                emojiCount -= 1
-            }
+            emojiCount = Int.random(in: 8..<vehiclesTheme.count)
+            chosenTheme = vehiclesTheme.shuffled()
         } label: {
-            Image(systemName: "minus.circle")
+            ThemeButton(imageName: "car.2", text: "Vehicles")
         }
     }
-
-    var addButton: some View {
+    
+    var FacesButton: some View {
         Button {
-            if emojiCount < emojis.count {
-                emojiCount += 1
-            }
+            emojiCount = Int.random(in: 8..<facesTheme.count)
+            chosenTheme = facesTheme.shuffled()
         } label: {
-            Image(systemName: "plus.circle")
+            ThemeButton(imageName: "face.smiling", text: "Faces")
+        }
+    }
+    
+    var FlagsButton: some View {
+        Button {
+            emojiCount = Int.random(in: 8..<flagsTheme.count)
+            chosenTheme = flagsTheme.shuffled()
+        } label: {
+            ThemeButton(imageName: "flag.slash", text: "Flags")
         }
     }
 }
+
+
+struct ThemeButton: View {
+    var imageName: String
+    var text: String
+
+    var body: some View {
+        VStack {
+            Image(systemName: imageName).font(.largeTitle)
+            Text(text).font(.body)
+        }
+
+    }
+}
+
 
 struct CardView: View {
     let content: String

@@ -11,6 +11,7 @@ struct MemoryGame<CardContent> where CardContent: Comparable {
     private(set) var cards: [Card]
 
     private var indexOfTheOnlyFaceUpCard: Int?
+    private(set) var score = 0
 
     init(numberOfPairsOfCards: Int, createCardContent: (Int) -> CardContent) {
         cards = [Card]()
@@ -20,6 +21,7 @@ struct MemoryGame<CardContent> where CardContent: Comparable {
             cards.append(Card(id: pairIndex * 2, content: content))
             cards.append(Card(id: pairIndex * 2 + 1, content: content))
         }
+        cards.shuffle()
     }
 
     mutating func choose(_ card: Card) {
@@ -35,6 +37,16 @@ struct MemoryGame<CardContent> where CardContent: Comparable {
                     // we have a match
                     cards[chosenIndex].isMatched = true
                     cards[indexOfPotentialMatch].isMatched = true
+                    score += 2
+                } else {
+                    if cards[chosenIndex].isSeen {
+                        score -= 1
+                    }
+                    if cards[indexOfPotentialMatch].isSeen {
+                        score -= 1
+                    }
+                    cards[chosenIndex].isSeen = true
+                    cards[indexOfPotentialMatch].isSeen = true
                 }
                 // set the index of the only faceUp card to nil because we already have 2 faceUp
                 indexOfTheOnlyFaceUpCard = nil
@@ -56,5 +68,6 @@ struct MemoryGame<CardContent> where CardContent: Comparable {
         var isFaceUp = false
         var isMatched = false
         let content: CardContent
+        var isSeen = false
     }
 }

@@ -24,44 +24,53 @@ struct MemoryGame<CardContent> where CardContent: Comparable {
         cards.shuffle()
     }
 
+    
+   
     mutating func choose(_ card: Card) {
-        // get the card and check it's not faceUp or matched already
-        if let chosenIndex = cards.firstIndex(where: { $0.id == card.id }),
+        // can't get card, already faceUp or already matched? exit early
+        guard
+            let chosenIndex = cards.firstIndex(where: { $0.id == card.id }),
             !cards[chosenIndex].isFaceUp,
             !cards[chosenIndex].isMatched
-        {
-            // we have the only card that is faceUp?
-            if let indexOfPotentialMatch = indexOfTheOnlyFaceUpCard {
-                // check if the only faceUp card is matching the chosenCard
-                if cards[indexOfPotentialMatch].content == card.content {
-                    // we have a match
-                    cards[chosenIndex].isMatched = true
-                    cards[indexOfPotentialMatch].isMatched = true
-                    score += 2
-                } else {
-                    if cards[chosenIndex].isSeen {
-                        score -= 1
-                    }
-                    if cards[indexOfPotentialMatch].isSeen {
-                        score -= 1
-                    }
-                    cards[chosenIndex].isSeen = true
-                    cards[indexOfPotentialMatch].isSeen = true
-                }
-                // set the index of the only faceUp card to nil because we already have 2 faceUp
-                indexOfTheOnlyFaceUpCard = nil
-            } else {
-                // turn all card to face down
-                for i in cards.indices {
-                    cards[i].isFaceUp = false
-                }
-                // when we turn all cards to facedown we set the chosen card as the onlyFaceUpCard
-                indexOfTheOnlyFaceUpCard = chosenIndex
+            else { return }
+        
+        // we have the only card that is faceUp?
+        if let indexOfPotentialMatch = indexOfTheOnlyFaceUpCard {
+            matchCards(indexOfPotentialMatch, card, chosenIndex)
+            indexOfTheOnlyFaceUpCard = nil
+        } else {
+            turnAllCardsDown()
+            indexOfTheOnlyFaceUpCard = chosenIndex
+        }
+        // then flip it
+        cards[chosenIndex].isFaceUp.toggle()
+    }
+    
+    mutating func matchCards(_ indexOfPotentialMatch: Int, _ card: MemoryGame<CardContent>.Card, _ chosenIndex: Array<MemoryGame<CardContent>.Card>.Index) {
+        // check if the only faceUp card is matching the chosenCard
+        if cards[indexOfPotentialMatch].content == card.content {
+            // we have a match
+            cards[chosenIndex].isMatched = true
+            cards[indexOfPotentialMatch].isMatched = true
+            score += 2
+        } else {
+            if cards[chosenIndex].isSeen {
+                score -= 1
             }
-            // then flip it
-            cards[chosenIndex].isFaceUp.toggle()
+            if cards[indexOfPotentialMatch].isSeen {
+                score -= 1
+            }
+            cards[chosenIndex].isSeen = true
+            cards[indexOfPotentialMatch].isSeen = true
         }
     }
+    
+    mutating func turnAllCardsDown() {
+        for i in cards.indices {
+            cards[i].isFaceUp = false
+        }
+    }
+    
 
     struct Card: Identifiable {
         let id: Int

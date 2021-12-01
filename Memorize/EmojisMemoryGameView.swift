@@ -18,50 +18,43 @@ struct EmojisMemoryGameView: View {
                 CardView(card: card)
                     .padding(4)
                     .onTapGesture {
-                    game.choose(card)
-                }
+                        game.choose(card)
+                    }
             }
         }
-            .foregroundColor(.red)
-            .padding(.horizontal)
+        .foregroundColor(.red)
+        .padding(.horizontal)
     }
 }
 
 struct CardView: View {
     let card: EmojiMemoryGame.Card
+    @State var degree = Angle.degrees(0)
 
     var body: some View {
         GeometryReader { geometry in
             ZStack {
-                let shape = RoundedRectangle(cornerRadius: constants.cornerRadius)
-
-                if card.isFaceUp {
-                    shape.foregroundColor(.white)
-                    shape.strokeBorder(lineWidth: constants.borderLineWidth)
-                    Pie(startAngle: Angle(degrees: 0 - 90), endAngle: Angle(degrees: 110 - 90))
-                        .padding(5).opacity(0.5)
-                    Text(card.content).font(font(in: geometry.size))
-                } else if card.isMatched {
-                    shape.opacity(0)
-                } else {
-                    shape
-                }
+                Pie(startAngle: Angle(degrees: 0 - 90), endAngle: Angle(degrees: 110 - 90))
+                    .padding(5).opacity(0.5)
+                Text(card.content)
+                    .rotationEffect(Angle.degrees(card.isMatched ? 360 : 0))
+                    .animation(.easeInOut(duration: 1).repeatForever(autoreverses: false))
+                    .font(.system(size: 32))
+                    .scaleEffect(scale(thatFits: geometry.size))
             }
+            .cardify(isFaceUp: card.isFaceUp)
         }
     }
 
-    private func font(in size: CGSize) -> Font {
-        Font.system(size: min(size.width, size.height) * constants.fontScale)
+    private func scale(thatFits size: CGSize) -> CGFloat {
+        min(size.width, size.height) / (constants.fontSize / constants.fontScale)
     }
 
-    private struct constants {
-        static let cornerRadius: CGFloat = 10
-        static let borderLineWidth: CGFloat = 3
+    private enum constants {
         static let fontScale: CGFloat = 0.7
+        static let fontSize: CGFloat = 32
     }
 }
-
-
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {

@@ -15,12 +15,12 @@ class EmojiMemoryGame: ObservableObject {
         "🚛", "🚜", "🚍", "🚘", "🚖", "🚇", "🚊", "🛵", "🏍", "🛺", "🚨", "🚔"
     ]
 
-    private static func createMemoryGame(emojis: [String]) -> MemoryGame<String> {
+    private static func createMemoryGame() -> MemoryGame<String> {
         MemoryGame<String>(numberOfPairsOfCards: 8) { emojis[$0] }
     }
 
     // every time in the model we create a new card we'll pass the index so we can get it from our array here
-    @Published private var model = createMemoryGame(emojis: emojis)
+    @Published private var model = createMemoryGame()
     var cards: [Card] { model.cards }
 
 
@@ -28,5 +28,13 @@ class EmojiMemoryGame: ObservableObject {
     // MARK: - Intent(s)
     func choose(_ card: Card) {
         model.choose(card)
+    }
+    
+    func shuffle() {
+        model.shuffle()
+    }
+    
+    func restart() {
+        model = EmojiMemoryGame.createMemoryGame()
     }
 }
